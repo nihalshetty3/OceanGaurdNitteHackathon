@@ -10,10 +10,10 @@ export default function Header() {
           <span className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-primary/10 text-primary">
             <Waves className="h-5 w-5" />
           </span>
-          <div className="-space-y-1">
-            <p className="font-extrabold tracking-tight text-lg leading-none">Ocean Guard</p>
-            <p className="text-xs text-muted-foreground leading-none">Stay Alert. Stay Safe.</p>
-          </div>
+           <div className="flex flex-col leading-tight">
+    <p className="font-extrabold tracking-tight text-lg">Ocean Guard</p>
+    <p className="text-xs text-muted-foreground">Stay Alert. Stay Safe.</p>
+  </div>
         </Link>
 
         <nav className="hidden md:flex items-center gap-6">
