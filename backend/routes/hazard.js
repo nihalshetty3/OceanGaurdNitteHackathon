@@ -1,6 +1,7 @@
 const express = require("express");
 const multer= require("multer");
 const Hazard= require("../models/hazard");
+const verifyToken = require("../middleware/authmiddleware");
 
 const router = express.Router();
 const storage= multer.diskStorage({
@@ -14,7 +15,7 @@ const storage= multer.diskStorage({
 
 const upload = multer({storage});
 
-router.post("/add", upload.single("photo"), async(req, res) =>{
+router.post("/add", verifyToken, upload.single("photo"), async(req, res) =>{
     try{
         const {title, type, description, location}= req.body;
         const newHazard = new Hazard({
