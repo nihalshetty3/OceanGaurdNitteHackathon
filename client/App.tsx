@@ -10,6 +10,8 @@ import NotFound from "./pages/NotFound";
 import Layout from "@/components/layout/Layout";
 import Community from "@/pages/Community";
 import PlaceholderPage from "@/pages/PlaceholderPage";
+import Login from "@/pages/Login";
+import Signup from "@/pages/Signup";
 
 const queryClient = new QueryClient();
 
@@ -25,8 +27,8 @@ const App = () => (
             <Route path="/community" element={<Community />} />
             <Route path="/alerts" element={<PlaceholderPage title="Live Alerts" description="A dedicated alerts dashboard can be added here. For now, view alerts on the homepage." />} />
             <Route path="/report" element={<PlaceholderPage title="Report Incident" description="Use the Community page to submit a report. We can add a standalone report flow here if you prefer." />} />
-            <Route path="/login" element={<PlaceholderPage title="Login" description="Clean login/signup forms can be added here. Let me know to build them next." />} />
-            <Route path="/signup" element={<PlaceholderPage title="Signup" description="Create an account to save preferences and manage reports. We can implement this next." />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
