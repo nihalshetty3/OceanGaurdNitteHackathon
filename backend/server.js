@@ -13,8 +13,10 @@ const port = 5000;
 app.use(express.json());
 app.use(cors());
 app.use("/uploads", express.static("uploads"));
+app.use("/api/hazards", hazardRoutes);
 app.use("/hazards", hazardRoutes);
 app.use("/auth", authRoutes);
+
 
 
 connectDB();
@@ -24,6 +26,32 @@ app.get("/", (req, res) => {
   }); 
 
 
+
+
+// ✅ Get all users
+app.get("/users", async (req, res) => {
+      try {
+          const users = await User.find();
+          res.json(users);   // 👈 Important: send JSON back
+      } catch (err) {
+          res.status(500).json({ error: err.message });
+      }
+  });
+
+  app.post("/users", async (req, res) => {
+      const { name, email, password } = req.body;
+      const newUser = new User({ name, email, password });
+
+      await newUser.save();
+      res.json({ message: "User added successfully!", user: newUser });
+  });
+  
+  const path = require("path");
+
+  // Serve frontend HTML file
+  app.get("/report", (req, res) => {
+    res.sendFile(path.join(__dirname, "report.html")); // make sure report.html is in backend folder
+  });
 
 
 app.listen(port, () => {
