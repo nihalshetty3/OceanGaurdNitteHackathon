@@ -16,6 +16,7 @@ export default function Signup() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const API_BASE = (import.meta as any).env?.VITE_API_BASE || "";
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -60,16 +61,31 @@ export default function Signup() {
       return;
     }
 
-    // Simulate API call
+    // Real API call
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      const res = await fetch(`${API_BASE}/auth/signup`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          phoneNumber: formData.phoneNumber,
+          password: formData.password,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.message || "Signup failed");
+      }
+
+      if (data?.token) {
+        localStorage.setItem("token", data.token);
+      }
+
       toast({
         title: "Success",
         description: "Account created successfully!",
       });
-      
-      // Reset form
       setFormData({
         name: "",
         email: "",
@@ -77,10 +93,10 @@ export default function Signup() {
         password: "",
         confirmPassword: "",
       });
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Signup failed. Please try again.",
+        description: error?.message || "Signup failed. Please try again.",
         variant: "destructive",
       });
     } finally {

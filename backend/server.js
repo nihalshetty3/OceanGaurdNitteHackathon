@@ -1,9 +1,9 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const mongoose = require('mongoose');  
 const hazardRoutes = require("./routes/hazard");
 const authRoutes = require("./routes/auth");
+const connectDB = require('./config/db');
 
 
 dotenv.config();
@@ -16,12 +16,8 @@ app.use("/uploads", express.static("uploads"));
 app.use("/hazards", hazardRoutes);
 app.use("/auth", authRoutes);
 
-mongoose.connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-})
-.then(() => console.log("✅ MongoDB Connected"))
-.catch((err) => console.error("❌ MongoDB Connection Error:", err));
+
+connectDB();
 
 app.get("/", (req, res) => {
       res.send("<h1>Server is running ✅ </h1>");

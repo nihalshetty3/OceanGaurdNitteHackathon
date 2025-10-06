@@ -11,6 +11,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const API_BASE = (import.meta as any).env?.VITE_API_BASE || "";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,22 +28,32 @@ export default function Login() {
       return;
     }
 
-    // Simulate API call
+    // Real API call
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      const res = await fetch(`${API_BASE}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.message || "Login failed");
+      }
+
+      if (data?.token) {
+        localStorage.setItem("token", data.token);
+      }
+
       toast({
         title: "Success",
         description: "Login successful!",
       });
-      
-      // Reset form
       setEmail("");
       setPassword("");
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Login failed. Please try again.",
+        description: error?.message || "Login failed. Please try again.",
         variant: "destructive",
       });
     } finally {
