@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,6 +17,7 @@ export default function Signup() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const API_BASE = (import.meta as any).env?.VITE_API_BASE || "";
+  const navigate = useNavigate();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -93,6 +94,7 @@ export default function Signup() {
         password: "",
         confirmPassword: "",
       });
+      navigate("/login");
     } catch (error: any) {
       toast({
         title: "Error",

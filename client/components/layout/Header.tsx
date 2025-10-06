@@ -1,6 +1,7 @@
 import { Link, NavLink } from "react-router-dom";
-import { Waves, AlertTriangle } from "lucide-react";
+import { Waves, AlertTriangle, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 
 export default function Header() {
   return (
@@ -30,9 +31,40 @@ export default function Header() {
           <Button asChild size="sm" className="hidden md:inline-flex">
             <Link to="/community#report"><AlertTriangle className="mr-2" /> Report</Link>
           </Button>
-          <Button asChild variant="outline" size="icon" className="md:hidden">
-            <Link to="/community#report"><AlertTriangle /></Link>
-          </Button>
+
+          {/* Mobile hamburger menu */}
+          <Drawer>
+            <DrawerTrigger asChild>
+              <Button variant="outline" size="icon" className="md:hidden">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </DrawerTrigger>
+            <DrawerContent>
+              <div className="p-6">
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-primary/10 text-primary">
+                    <Waves className="h-5 w-5" />
+                  </span>
+                  <div className="flex flex-col leading-tight">
+                    <p className="font-extrabold tracking-tight">Ocean Guard</p>
+                    <p className="text-xs text-muted-foreground">Stay Alert. Stay Safe.</p>
+                  </div>
+                </div>
+                <nav className="mt-6 grid gap-3">
+                  <NavLink to="/" className={({ isActive }) => `rounded-md px-3 py-2 transition-colors ${isActive ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"}`}>Home</NavLink>
+                  <NavLink to="/alerts" className={({ isActive }) => `rounded-md px-3 py-2 transition-colors ${isActive ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"}`}>Alerts</NavLink>
+                  <NavLink to="/community" className={({ isActive }) => `rounded-md px-3 py-2 transition-colors ${isActive ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"}`}>Community</NavLink>
+                  <NavLink to="/report" className={({ isActive }) => `rounded-md px-3 py-2 transition-colors ${isActive ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"}`}>Report</NavLink>
+                  <div className="h-px bg-border my-2" />
+                  <NavLink to="/login" className={({ isActive }) => `rounded-md px-3 py-2 transition-colors ${isActive ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"}`}>Login</NavLink>
+                  <NavLink to="/signup" className={({ isActive }) => `rounded-md px-3 py-2 transition-colors ${isActive ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"}`}>Signup</NavLink>
+                  <Button asChild className="mt-2">
+                    <Link to="/community#report"><AlertTriangle className="mr-2" /> Report Incident</Link>
+                  </Button>
+                </nav>
+              </div>
+            </DrawerContent>
+          </Drawer>
         </div>
       </div>
     </header>

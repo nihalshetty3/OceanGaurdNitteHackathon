@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +12,7 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const API_BASE = (import.meta as any).env?.VITE_API_BASE || "";
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,6 +51,7 @@ export default function Login() {
       });
       setEmail("");
       setPassword("");
+      navigate("/");
     } catch (error: any) {
       toast({
         title: "Error",
