@@ -18,36 +18,63 @@ export default function Community() {
   const [filterDate, setFilterDate] = useState<"All" | "Today">("All");
   const fileRef = useRef<HTMLInputElement | null>(null);
 
-  const onSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
+  const onSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
     const data = new FormData(e.currentTarget);
+  
     const title = String(data.get("title") || "").trim();
     const description = String(data.get("description") || "").trim();
     const location = String(data.get("location") || "").trim();
     const type = String(data.get("type") || "Other") as AlertType;
     const file = data.get("photo") as File | null;
-
-    let photo: string | undefined;
-    if (file && file.size > 0) {
-      photo = URL.createObjectURL(file);
-    }
-
+  
     if (!title || !description || !location) return;
-
-    const item: Report = {
-      id: crypto.randomUUID(),
-      type,
-      severity: "info",
-      location,
-      time: new Date().toLocaleString(),
-      description,
-      photo,
-      createdAt: new Date().toISOString(),
-    };
-    setReports((prev) => [item, ...prev]);
-    e.currentTarget.reset();
-    if (fileRef.current) fileRef.current.value = "";
+  
+    try {
+      // Send to backend
+      const res = await fetch("http://localhost:5000/api/hazards/add", {
+        method: "POST",
+        body: data, // FormData includes file if present
+      });
+  
+      const result = await res.json();
+  
+      if (!res.ok) {
+        console.error("Backend error:", result);
+        alert("Failed to submit report: " + (result.error || "Unknown error"));
+        return;
+      }
+  
+      // Add locally for instant UI update
+      let photoUrl: string | undefined;
+      if (file && file.size > 0) {
+        // Use backend uploaded photo path
+        photoUrl = `http://localhost:5000/uploads/${result.hazard.photo}`;
+      }
+  
+      const item: Report = {
+        id: result.hazard._id, // use MongoDB ID
+        type,
+        severity: "info",
+        location,
+        time: new Date().toLocaleString(),
+        description,
+        photo: photoUrl,
+        createdAt: new Date().toISOString(),
+      };
+  
+      setReports((prev) => [item, ...prev]);
+      e.currentTarget.reset();
+      if (fileRef.current) fileRef.current.value = "";
+  
+      alert("✅ Hazard report submitted successfully!");
+  
+    } catch (err) {
+      console.error("Fetch error:", err);
+      alert("❌ Failed to connect to server");
+    }
   };
+  
 
   const filtered = useMemo(() => {
     return reports.filter((r) => {
