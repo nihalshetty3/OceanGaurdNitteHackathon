@@ -1,8 +1,11 @@
 const { Worker } = require('bullmq');
 const axios = require('axios');
 const mongoose = require('mongoose');
-const Hazard = require('../models/hazard'); // Adjust path if necessary
-require('dotenv').config({ path: '../.env' }); // Load .env from backend root
+const path = require('path'); // Using path module for robustness
+const Hazard = require('../models/hazard'); 
+
+// ✅ CORRECTED PATH: This now correctly points to the .env file in your backend folder
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 // --- Database & Redis Connection ---
 const redisConnection = {
@@ -10,8 +13,16 @@ const redisConnection = {
   port: process.env.REDIS_PORT || 6379,
 };
 
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('Worker connected to MongoDB Atlas.'))
+// Use a combined variable for flexibility
+const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URI;
+
+if (!mongoUri) {
+  console.error('FATAL ERROR: MONGODB_URI (or MONGO_URI) is not defined in the .env file.');
+  process.exit(1);
+}
+
+mongoose.connect(mongoUri)
+  .then(() => console.log('✅ Worker connected to MongoDB Atlas.'))
   .catch((err) => console.error('Worker MongoDB connection error:', err));
 
 
@@ -21,27 +32,21 @@ const worker = new Worker('ai-verification', async (job) => {
   console.log(`[WORKER] Processing job ${job.id}: Verifying ${reportIds.length} reports.`);
 
   try {
-    // 1. Call your Python AI service, now with location data
-    // This is the slow part that runs in the background.
     const aiResponse = await axios.post('http://localhost:8000/verify-hazard', { 
       description,
-      location // Send the whole location object
+      location
     });
     
     const { isHazard, confidence } = aiResponse.data;
-
-    // 2. Determine the final status based on the AI's response
     const finalStatus = isHazard ? 'verified' : 'rejected';
 
-    // 3. Update the reports in the database
     await Hazard.updateMany(
       { _id: { $in: reportIds } },
       { $set: { status: finalStatus } }
     );
-    console.log(`[WORKER] Job ${job.id} complete. Reports updated to: ${finalStatus} with confidence ${confidence}`);
+    console.log(`[WORKER] Job ${job.id} complete. Status: ${finalStatus}, Confidence: ${confidence}`);
   } catch (error) {
     console.error(`[WORKER] Job ${job.id} failed:`, error.message);
-    // This will cause the job to be retried if it fails
     throw error;
   }
 }, { connection: redisConnection });
@@ -51,3 +56,4 @@ console.log("✅ Verification worker is running and waiting for jobs...");
 worker.on('failed', (job, err) => {
   console.error(`Job ${job.id} failed with error: ${err.message}`);
 });
+
