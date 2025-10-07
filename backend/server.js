@@ -11,7 +11,36 @@ const app = express();
 const port = 5000;
 
 app.use(express.json());
-app.use(cors());
+
+
+const allowedOrigins = [
+    'http://localhost:5173', 
+    
+  ];
+  
+  const corsOptions = {
+    origin: function (origin, callback) {
+      
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) === -1) {
+        const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+        return callback(new Error(msg), false);
+      }
+      return callback(null, true);
+    },
+    credentials: true, 
+  };
+  
+  app.use(cors(corsOptions)); 
+  
+  app.use((req, res, next) => {
+    res.header(
+      'Access-Control-Allow-Headers',
+      'Origin, X-Requested-With, Content-Type, Accept, Authorization'
+    );
+    next();
+  });
+
 app.use("/uploads", express.static("uploads"));
 app.use("/api/hazards", hazardRoutes);
 app.use("/hazards", hazardRoutes);
