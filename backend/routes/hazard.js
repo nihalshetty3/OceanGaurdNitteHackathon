@@ -1,13 +1,11 @@
 const express = require('express');
 const router = express.Router();
-
-const sendMail=require("../utils/sendEmail"); //for sending email to users
-
 const multer = require('multer');
 const path = require('path');
 const Hazard = require('../models/hazard');
-const verificationQueue = require('../queues/verificationQueue');
-const authMiddleware = require('../middleware/auth');
+const verificationQueue = require('../queues/verificationqueues');
+const authMiddleware = require('../middleware/authmiddleware');
+const sendMail=require("../utils/sendEmail"); //for sending email to users
 
 // --- Multer Setup for Image Uploads ---
 // This configures how files are stored.
@@ -22,23 +20,6 @@ const storage = multer.diskStorage({
     cb(null, `hazard-${Date.now()}${path.extname(file.originalname)}`);
   },
 });
-
-
-// ✅ POST /api/hazards/add
-router.post("/add", upload.single("photo"), async (req, res) => {
-  try {
-    const { title, hazardType, description, pincode, reportedBy } = req.body;
-
-    // Step 1️⃣: Check if pincode exists in DB
-    const validPin = await Pincode.findOne({
-      pincode: Number(pincode) || pincode.toString().trim()
-    });
-    
-
-    if (!validPin) {
-      return res.status(400).json({
-        error: "Invalid pincode — this area is not registered in our database.",
-      });
 
 const upload = multer({ 
   storage: storage,
@@ -139,4 +120,3 @@ router.get('/all', authMiddleware, async (req, res) => {
 
 
 module.exports = router;
-
