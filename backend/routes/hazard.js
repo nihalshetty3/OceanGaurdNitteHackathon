@@ -1,76 +1,122 @@
-const express = require("express");
-const multer = require("multer");
-const Hazard = require("../models/hazard");
-const Pincode = require("../models/pincode"); 
-
+const express = require('express');
 const router = express.Router();
+const multer = require('multer');
+const path = require('path');
+const Hazard = require('../models/hazard');
+const verificationQueue = require('../queues/verificationQueue');
+const authMiddleware = require('../middleware/auth');
 
-// Multer setup for file uploads
+// --- Multer Setup for Image Uploads ---
+// This configures how files are stored.
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/"); // Make sure this folder exists
+    // We'll store images in a public/uploads folder. 
+    // You must create this folder in your backend directory.
+    cb(null, 'uploads/');
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + "-" + file.originalname);
+    // Create a unique filename to prevent overwrites
+    cb(null, `hazard-${Date.now()}${path.extname(file.originalname)}`);
   },
 });
-const upload = multer({ storage });
 
-
-router.post("/add", upload.single("photo"), async (req, res) => {
-  try {
-    const { title, hazardType, description, pincode, reportedBy } = req.body;
-
-    
-    const validPin = await Pincode.findOne({ pincode: pincode.toString().trim() });
-
-    if (!validPin) {
-      return res.status(400).json({
-        error: "Invalid pincode — this area is not registered in our database.",
-      });
+const upload = multer({ 
+  storage: storage,
+  // Optional: Add file filter for security
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed!'), false);
     }
-
-
-    const location = {
-      type: "Point",
-      coordinates: [validPin.longitude, validPin.latitude], // [lng, lat]
-    };
-
-    // Step 3️⃣: Create new hazard document
-    const newHazard = new Hazard({
-      title,
-      description,
-      hazardType,
-      location,
-      reportedBy,
-      photo: req.file ? req.file.filename : null,
-    });
-
-    // Step 4️⃣: Save hazard to DB
-    await newHazard.save();
-
-    res.status(201).json({
-      message: "✅ Hazard report saved successfully!",
-      hazard: newHazard,
-    });
-
-  } catch (err) {
-    console.error("❌ Error saving hazard:", err);
-    res.status(500).json({ error: "Something went wrong while submitting the report." });
   }
 });
 
 
-router.get("/", async (req, res) => {
+// --- API Routes ---
+
+// POST /api/hazards - Create a new hazard report (with image)
+router.post('/', authMiddleware, upload.single('photo'), async (req, res) => {
+  const { title, hazardType, description, longitude, latitude } = req.body;
+  const userId = req.user.id;
+
+  if (!description || !longitude || !latitude) {
+    return res.status(400).json({ error: 'Description and location coordinates are required.' });
+  }
+
+  // 1. Save the new report with 'unverified' status and photo path
+  const newReport = new Hazard({
+    title,
+    hazardType,
+    description,
+    photo: req.file ? req.file.path : null, // Get the file path from multer
+    reportedBy: userId,
+    status: 'unverified',
+    location: { type: 'Point', coordinates: [parseFloat(longitude), parseFloat(latitude)] },
+  });
+  await newReport.save();
+  console.log(`[API] New hazard report ${newReport._id} with image saved.`);
+
+  // --- THRESHOLD CHECK LOGIC (No changes here) ---
   try {
-    const hazards = await Hazard.find()
-      .populate("reportedBy", "name email")
-      .sort({ createdAt: -1 });
-    res.json(hazards);
-  } catch (err) {
-    console.error("❌ Error fetching hazards:", err);
-    res.status(500).json({ error: "Something went wrong fetching hazards." });
+    const ONE_KILOMETER_IN_METERS = 1000;
+    const REPORTING_THRESHOLD = 3; 
+
+    const nearbyReports = await Hazard.find({
+      location: { $near: { $geometry: newReport.location, $maxDistance: ONE_KILOMETER_IN_METERS } },
+      status: 'unverified'
+    });
+    console.log(`[API] Found ${nearbyReports.length} nearby unverified reports.`);
+
+    if (nearbyReports.length >= REPORTING_THRESHOLD) {
+      const reportIdsToVerify = nearbyReports.map(report => report._id);
+
+      // 2. Add a job to the queue.
+      await verificationQueue.add('verify-hazard-job', {
+        reportIds: reportIdsToVerify,
+        description: newReport.description,
+        location: newReport.location
+      });
+      console.log(`[API] Threshold met. Job added to queue for ${reportIdsToVerify.length} reports.`);
+      
+      await Hazard.updateMany(
+        { _id: { $in: reportIdsToVerify } },
+        { $set: { status: 'pending_ai' } }
+      );
+    }
+  } catch (error) {
+    console.error("[API] Error during threshold check:", error);
+  }
+
+  // 3. Respond to the user immediately
+  res.status(201).json({ message: 'Hazard reported. It will be reviewed shortly.', report: newReport });
+});
+
+
+// GET /api/hazards - Fetches only VERIFIED hazards for the public map
+router.get('/', async (req, res) => {
+  try {
+    const verifiedHazards = await Hazard.find({ status: 'verified' }).sort({ createdAt: -1 }); 
+    res.json(verifiedHazards);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch hazard data' });
   }
 });
+
+
+// GET /api/hazards/all - Fetches ALL hazards for the authority dashboard
+router.get('/all', authMiddleware, async (req, res) => {
+  // Add another middleware here to check if req.user.isAdmin if you have roles
+  try {
+    const allHazards = await Hazard.find()
+      .populate("reportedBy", "name email") // Show who reported it
+      .sort({ createdAt: -1 });
+    res.json(allHazards);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch all hazard data' });
+  }
+});
+
 
 module.exports = router;
+
