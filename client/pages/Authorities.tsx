@@ -3,23 +3,70 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useEffect, useMemo, useState } from "react";
 
 type Incident = {
   id: string;
   type: string;
+  // Normalize to lowercase internally
   severity: "info" | "warning" | "critical";
   location: string;
-  reportedAt: string;
+  reportedAt: string; // ISO string
   status: "open" | "acknowledged" | "resolved";
 };
 
-const SAMPLE_INCIDENTS: Incident[] = [
-  { id: "INC-1024", type: "Cyclone", severity: "warning", location: "Bay of Bengal", reportedAt: "5m ago", status: "acknowledged" },
-  { id: "INC-1023", type: "Flood", severity: "critical", location: "Kochi, KL", reportedAt: "16m ago", status: "open" },
-  { id: "INC-1019", type: "Earthquake", severity: "info", location: "Gujarat", reportedAt: "1h ago", status: "resolved" },
-];
-
 export default function Authorities() {
+  const [incidents, setIncidents] = useState<Incident[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function fetchIncidents() {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const res = await fetch("http://localhost:5000/api/hazards/recent", {
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+        });
+        if (!res.ok) {
+          throw new Error(`Failed to load incidents (${res.status})`);
+        }
+        const data: { success: boolean; incidents: any[] } = await res.json();
+        if (!data?.success || !Array.isArray(data.incidents)) {
+          throw new Error("Invalid incidents response");
+        }
+        const normalized: Incident[] = data.incidents.map((it) => ({
+          id: String(it.id ?? ""),
+          type: String(it.type ?? "Unknown"),
+          severity: String(it.severity ?? "info").toLowerCase() as Incident["severity"],
+          location: String(it.location ?? "Unknown"),
+          reportedAt: String(it.reportedAt ?? new Date().toISOString()),
+          status: String(it.status ?? "open").toLowerCase() as Incident["status"],
+        }));
+        if (isMounted) setIncidents(normalized);
+      } catch (e: any) {
+        if (isMounted) setError(e?.message ?? "Error loading incidents");
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    }
+    fetchIncidents();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const stats = useMemo(() => {
+    const total = incidents.length;
+    const critical = incidents.filter((i) => i.severity === "critical").length;
+    const acknowledged = incidents.filter((i) => i.status === "acknowledged").length;
+    // Placeholder for resolved in last 24h; here we count all resolved
+    const resolved = incidents.filter((i) => i.status === "resolved").length;
+    return { total, critical, acknowledged, resolved };
+  }, [incidents]);
+
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
@@ -39,28 +86,28 @@ export default function Authorities() {
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Active Incidents</CardDescription>
-            <CardTitle className="text-3xl">7</CardTitle>
+            <CardTitle className="text-3xl">{stats.total}</CardTitle>
           </CardHeader>
           <CardContent className="text-muted-foreground text-sm">Across coastal regions</CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Critical Severity</CardDescription>
-            <CardTitle className="text-3xl">2</CardTitle>
+            <CardTitle className="text-3xl">{stats.critical}</CardTitle>
           </CardHeader>
           <CardContent className="text-muted-foreground text-sm">Immediate attention needed</CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Acknowledged</CardDescription>
-            <CardTitle className="text-3xl">4</CardTitle>
+            <CardTitle className="text-3xl">{stats.acknowledged}</CardTitle>
           </CardHeader>
           <CardContent className="text-muted-foreground text-sm">Assigned to response teams</CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Resolved (24h)</CardDescription>
-            <CardTitle className="text-3xl">12</CardTitle>
+            <CardTitle className="text-3xl">{stats.resolved}</CardTitle>
           </CardHeader>
           <CardContent className="text-muted-foreground text-sm">Successfully closed</CardContent>
         </Card>
@@ -80,6 +127,13 @@ export default function Authorities() {
           </div>
         </CardHeader>
         <CardContent>
+          {isLoading && (
+            <div className="text-sm text-muted-foreground">Loading incidents…</div>
+          )}
+          {error && !isLoading && (
+            <div className="text-sm text-red-600">{error}</div>
+          )}
+          {!isLoading && !error && (
           <Table>
             <TableHeader>
               <TableRow>
@@ -93,7 +147,7 @@ export default function Authorities() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {SAMPLE_INCIDENTS.map((inc) => (
+              {incidents.map((inc) => (
                 <TableRow key={inc.id}>
                   <TableCell className="font-medium">{inc.id}</TableCell>
                   <TableCell className="flex items-center gap-2">
@@ -105,7 +159,7 @@ export default function Authorities() {
                     {inc.severity === "info" && <Badge>Info</Badge>}
                   </TableCell>
                   <TableCell>{inc.location}</TableCell>
-                  <TableCell>{inc.reportedAt}</TableCell>
+                  <TableCell>{new Date(inc.reportedAt).toLocaleString()}</TableCell>
                   <TableCell>
                     {inc.status === "open" && <Badge variant="destructive">Open</Badge>}
                     {inc.status === "acknowledged" && <Badge variant="secondary">Acknowledged</Badge>}
@@ -118,6 +172,7 @@ export default function Authorities() {
               ))}
             </TableBody>
           </Table>
+          )}
         </CardContent>
       </Card>
     </div>
