@@ -21,54 +21,65 @@ export default function Community() {
   const onSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
     const data = new FormData(e.currentTarget);
-  
+
     const title = String(data.get("title") || "").trim();
     const description = String(data.get("description") || "").trim();
     const location = String(data.get("location") || "").trim();
+    // New: Extract Pincode
+    const pincode = String(data.get("pincode") || "").trim(); 
     const type = String(data.get("type") || "Other") as AlertType;
     const file = data.get("photo") as File | null;
-  
-    if (!title || !description || !location) return;
-  
+
+    // Updated validation to include pincode
+    if (!title || !description || !location || !pincode) {
+        alert("Please fill out all required fields (Title, Description, Location, and Pincode).");
+        return;
+    }
+
     try {
       // Send to backend
+      // NOTE: The backend API at http://localhost:5000/api/hazards/add must be updated
+      // to handle and save the new 'pincode' field from the FormData.
       const res = await fetch("http://localhost:5000/api/hazards/add", {
         method: "POST",
-        body: data, // FormData includes file if present
+        body: data, // FormData includes all fields including pincode and file
       });
-  
+
       const result = await res.json();
-  
+
       if (!res.ok) {
         console.error("Backend error:", result);
         alert("Failed to submit report: " + (result.error || "Unknown error"));
         return;
       }
-  
+
       // Add locally for instant UI update
       let photoUrl: string | undefined;
       if (file && file.size > 0) {
         // Use backend uploaded photo path
         photoUrl = `http://localhost:5000/uploads/${result.hazard.photo}`;
       }
-  
+      
+      // We combine location and pincode for display purposes
+      const displayLocation = `${location} (Pincode: ${pincode})`;
+
       const item: Report = {
         id: result.hazard._id, // use MongoDB ID
         type,
         severity: "info",
-        location,
+        location: displayLocation, // Use the combined location
         time: new Date().toLocaleString(),
         description,
         photo: photoUrl,
         createdAt: new Date().toISOString(),
       };
-  
+
       setReports((prev) => [item, ...prev]);
       e.currentTarget.reset();
       if (fileRef.current) fileRef.current.value = "";
-  
+
       alert("✅ Hazard report submitted successfully!");
-  
+
     } catch (err) {
       console.error("Fetch error:", err);
       alert("❌ Failed to connect to server");
@@ -94,6 +105,7 @@ export default function Community() {
         </div>
 
         <form onSubmit={onSubmit} className="rounded-xl border bg-card p-4 md:p-6 shadow-sm space-y-4">
+          
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="title">Title</Label>
@@ -119,13 +131,21 @@ export default function Community() {
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="location">Location</Label>
-              <Input id="location" name="location" placeholder="City, area or coordinates" required />
+              <Label htmlFor="location">City/Area Location</Label>
+              <Input id="location" name="location" placeholder="City or nearby landmark" required />
             </div>
+            
+            {/* NEW PINCODE FIELD */}
             <div className="space-y-2">
-              <Label htmlFor="photo">Photo</Label>
-              <Input ref={fileRef} id="photo" name="photo" type="file" accept="image/*" />
+              <Label htmlFor="pincode">Pincode</Label>
+              <Input id="pincode" name="pincode" placeholder="e.g., 575003" required type="number" pattern="\d{6}" maxLength={6} />
             </div>
+          </div>
+          
+          {/* Photo field moved to a single line for cleaner layout, adjust as needed */}
+          <div className="space-y-2">
+            <Label htmlFor="photo">Photo (Optional)</Label>
+            <Input ref={fileRef} id="photo" name="photo" type="file" accept="image/*" />
           </div>
 
           <div className="flex justify-end">
@@ -134,6 +154,7 @@ export default function Community() {
         </form>
       </section>
 
+      {/* REMAINDER OF THE COMPONENT (COMMUNITY REPORTS SECTION) IS UNCHANGED */}
       <section className="space-y-4">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
