@@ -3,8 +3,8 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const Hazard = require('../models/hazard');
-const verificationQueue = require('../queues/verificationQueue');
-const authMiddleware = require('../middleware/auth');
+const verificationQueue = require('../queues/verificationqueues');
+const authMiddleware = require('../middleware/authmiddleware');
 
 // --- Multer Setup for Image Uploads ---
 // This configures how files are stored.
