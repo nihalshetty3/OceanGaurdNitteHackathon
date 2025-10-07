@@ -4,6 +4,7 @@ const Hazard = require("../models/hazard");
 const Pincode = require("../models/pincode"); // ✅ import the pincode model
 
 const router = express.Router();
+const sendMail=require("../utils/sendEmail"); //for sending email to users
 
 // Multer setup for file uploads
 const storage = multer.diskStorage({
@@ -22,7 +23,10 @@ router.post("/add", upload.single("photo"), async (req, res) => {
     const { title, hazardType, description, pincode, reportedBy } = req.body;
 
     // Step 1️⃣: Check if pincode exists in DB
-    const validPin = await Pincode.findOne({ pincode: pincode.toString().trim() });
+    const validPin = await Pincode.findOne({
+      pincode: Number(pincode) || pincode.toString().trim()
+    });
+    
 
     if (!validPin) {
       return res.status(400).json({
