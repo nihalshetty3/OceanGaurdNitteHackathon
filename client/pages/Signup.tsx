@@ -16,7 +16,7 @@ export default function Signup() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const API_BASE = (import.meta as any).env?.VITE_API_BASE || "";
+  const API_BASE = (import.meta as any).env?.VITE_API_BASE || "http://localhost:5000";
   const navigate = useNavigate();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {

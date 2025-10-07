@@ -11,7 +11,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const API_BASE = (import.meta as any).env?.VITE_API_BASE || "";
+  const API_BASE = (import.meta as any).env?.VITE_API_BASE || "http://localhost:5000";
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -38,7 +38,7 @@ export default function Login() {
       });
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data?.message || "Login failed");
+        throw new Error(data?.error || data?.message || `Login failed (${res.status})`);
       }
 
       if (data?.token) {

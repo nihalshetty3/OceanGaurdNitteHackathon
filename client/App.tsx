@@ -13,9 +13,12 @@ import PlaceholderPage from "@/pages/PlaceholderPage";
 import Login from "@/pages/Login";
 import Signup from "@/pages/Signup";
 import Authorities from "@/pages/Authorities";
+import Profile from "@/pages/Profile";
 // --- REQUIRED NEW IMPORT ---
 import AssignTeamsPage from "./pages/AssignTeamsPage"; // Import your new component
 // -------------------------
+import CriminalReportPage from "./pages/CriminalReportPage";
+import MunicipalityReportPage from "./pages/MunicipalityReportPage";
 
 const queryClient = new QueryClient();
 
@@ -56,9 +59,12 @@ const App = () => (
               element={<AssignTeamsPage />} // Now uses the actual component
             />
             {/* ------------------------------------------------------------- */}
+            <Route path="/criminalreport" element={<CriminalReportPage />} />
+            <Route path="/municipalityreport" element={<MunicipalityReportPage />} />
             
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/profile" element={<Profile />} />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 
 export default function Header() {
+  const isLoggedIn = typeof window !== "undefined" && !!localStorage.getItem("token");
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60">
       <div className="container flex h-16 items-center justify-between">
@@ -23,8 +24,14 @@ export default function Header() {
           <NavLink to="/community" className={({ isActive }) => isActive ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"}>Community</NavLink>
           <NavLink to="/report" className={({ isActive }) => isActive ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"}>Report</NavLink>
           <div className="h-5 w-px bg-border" />
-          <NavLink to="/login" className={({ isActive }) => isActive ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"}>Login</NavLink>
-          <NavLink to="/signup" className={({ isActive }) => isActive ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"}>Signup</NavLink>
+          {!isLoggedIn ? (
+            <>
+              <NavLink to="/login" className={({ isActive }) => isActive ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"}>Login</NavLink>
+              <NavLink to="/signup" className={({ isActive }) => isActive ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"}>Signup</NavLink>
+            </>
+          ) : (
+            <NavLink to="/profile" className={({ isActive }) => isActive ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"}>My Profile</NavLink>
+          )}
         </nav>
 
         <div className="flex items-center gap-2">
@@ -56,8 +63,14 @@ export default function Header() {
                   <NavLink to="/community" className={({ isActive }) => `rounded-md px-3 py-2 transition-colors ${isActive ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"}`}>Community</NavLink>
                   <NavLink to="/report" className={({ isActive }) => `rounded-md px-3 py-2 transition-colors ${isActive ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"}`}>Report</NavLink>
                   <div className="h-px bg-border my-2" />
-                  <NavLink to="/login" className={({ isActive }) => `rounded-md px-3 py-2 transition-colors ${isActive ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"}`}>Login</NavLink>
-                  <NavLink to="/signup" className={({ isActive }) => `rounded-md px-3 py-2 transition-colors ${isActive ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"}`}>Signup</NavLink>
+                  {!isLoggedIn ? (
+                    <>
+                      <NavLink to="/login" className={({ isActive }) => `rounded-md px-3 py-2 transition-colors ${isActive ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"}`}>Login</NavLink>
+                      <NavLink to="/signup" className={({ isActive }) => `rounded-md px-3 py-2 transition-colors ${isActive ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"}`}>Signup</NavLink>
+                    </>
+                  ) : (
+                    <NavLink to="/profile" className={({ isActive }) => `rounded-md px-3 py-2 transition-colors ${isActive ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"}`}>My Profile</NavLink>
+                  )}
                   <Button asChild className="mt-2">
                     <Link to="/community#report"><AlertTriangle className="mr-2" /> Report Incident</Link>
                   </Button>

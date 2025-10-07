@@ -57,7 +57,8 @@ router.post("/login", async (req, res) => {
             return res.status(400).json({ message: "Email and password are required" });
         }
 
-        const user = await User.findOne({ email }).select("+password name email phoneNumber");
+        // Fetch the full user doc; password is not excluded in the schema
+        const user = await User.findOne({ email });
         if (!user) {
             return res.status(401).json({ message: "Invalid credentials" });
         }
@@ -80,6 +81,7 @@ router.post("/login", async (req, res) => {
             },
         });
     } catch (err) {
+        console.error("/auth/login error:", err);
         return res.status(500).json({ message: "Server error", error: err.message });
     }
 });
