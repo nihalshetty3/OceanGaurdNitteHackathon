@@ -19,6 +19,7 @@ import AssignTeamsPage from "./pages/AssignTeamsPage"; // Import your new compon
 // -------------------------
 import CriminalReportPage from "./pages/CriminalReportPage";
 import MunicipalityReportPage from "./pages/MunicipalityReportPage";
+import OceanReportPage from "./pages/OceanReportPage";
 
 const queryClient = new QueryClient();
 
@@ -61,6 +62,7 @@ const App = () => (
             {/* ------------------------------------------------------------- */}
             <Route path="/criminalreport" element={<CriminalReportPage />} />
             <Route path="/municipalityreport" element={<MunicipalityReportPage />} />
+            <Route path="/oceanreport" element={<OceanReportPage />} />
             
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
