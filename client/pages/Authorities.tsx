@@ -3,23 +3,105 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useEffect, useMemo, useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import OceanMap, { type MapMarker } from "@/components/OceanMap";
+import type { AlertType } from "@/components/AlertCard";
 
 type Incident = {
   id: string;
   type: string;
+  // Normalize to lowercase internally
   severity: "info" | "warning" | "critical";
   location: string;
-  reportedAt: string;
+  reportedAt: string; // ISO string
   status: "open" | "acknowledged" | "resolved";
 };
 
-const SAMPLE_INCIDENTS: Incident[] = [
-  { id: "INC-1024", type: "Cyclone", severity: "warning", location: "Bay of Bengal", reportedAt: "5m ago", status: "acknowledged" },
-  { id: "INC-1023", type: "Flood", severity: "critical", location: "Kochi, KL", reportedAt: "16m ago", status: "open" },
-  { id: "INC-1019", type: "Earthquake", severity: "info", location: "Gujarat", reportedAt: "1h ago", status: "resolved" },
-];
-
 export default function Authorities() {
+  const [incidents, setIncidents] = useState<Incident[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isMapOpen, setIsMapOpen] = useState<boolean>(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function fetchIncidents() {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const res = await fetch("http://localhost:5000/api/hazards/recent", {
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+        });
+        if (!res.ok) {
+          throw new Error(`Failed to load incidents (${res.status})`);
+        }
+        const data: { success: boolean; incidents: any[] } = await res.json();
+        if (!data?.success || !Array.isArray(data.incidents)) {
+          throw new Error("Invalid incidents response");
+        }
+        const normalized: Incident[] = data.incidents.map((it) => ({
+          id: String(it.id ?? ""),
+          type: String(it.type ?? "Unknown"),
+          severity: String(it.severity ?? "info").toLowerCase() as Incident["severity"],
+          location: String(it.location ?? "Unknown"),
+          reportedAt: String(it.reportedAt ?? new Date().toISOString()),
+          status: String(it.status ?? "open").toLowerCase() as Incident["status"],
+        }));
+        if (isMounted) setIncidents(normalized);
+      } catch (e: any) {
+        if (isMounted) setError(e?.message ?? "Error loading incidents");
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    }
+    fetchIncidents();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const stats = useMemo(() => {
+    const total = incidents.length;
+    const critical = incidents.filter((i) => i.severity === "critical").length;
+    const acknowledged = incidents.filter((i) => i.status === "acknowledged").length;
+    // Placeholder for resolved in last 24h; here we count all resolved
+    const resolved = incidents.filter((i) => i.status === "resolved").length;
+    return { total, critical, acknowledged, resolved };
+  }, [incidents]);
+
+  // Build map markers from incidents when possible (expects location as "lat,lng" or similar)
+  const markers: MapMarker[] = useMemo(() => {
+    const allowedTypes: AlertType[] = ["Flood", "Earthquake", "Cyclone", "Tsunami", "Other"];
+    const toAlertType = (t: string): AlertType => {
+      const normalized = t.trim().toLowerCase();
+      const match = allowedTypes.find((x) => x.toLowerCase() === normalized);
+      return match ?? "Other";
+    };
+    const parseLatLng = (loc: string): [number, number] | null => {
+      // Try to parse formats like "lat,lng" or "lat | lng" etc.
+      const parts = loc.split(/[,|\s]+/).filter(Boolean);
+      if (parts.length < 2) return null;
+      const lat = Number(parts[0]);
+      const lng = Number(parts[1]);
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+      return [lat, lng];
+    };
+    return incidents
+      .map((inc) => {
+        const pos = parseLatLng(inc.location);
+        if (!pos) return null;
+        return {
+          id: inc.id,
+          position: pos,
+          title: inc.type,
+          type: toAlertType(inc.type),
+        } satisfies MapMarker;
+      })
+      .filter(Boolean) as MapMarker[];
+  }, [incidents]);
+
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
@@ -39,28 +121,28 @@ export default function Authorities() {
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Active Incidents</CardDescription>
-            <CardTitle className="text-3xl">7</CardTitle>
+            <CardTitle className="text-3xl">{stats.total}</CardTitle>
           </CardHeader>
           <CardContent className="text-muted-foreground text-sm">Across coastal regions</CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Critical Severity</CardDescription>
-            <CardTitle className="text-3xl">2</CardTitle>
+            <CardTitle className="text-3xl">{stats.critical}</CardTitle>
           </CardHeader>
           <CardContent className="text-muted-foreground text-sm">Immediate attention needed</CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Acknowledged</CardDescription>
-            <CardTitle className="text-3xl">4</CardTitle>
+            <CardTitle className="text-3xl">{stats.acknowledged}</CardTitle>
           </CardHeader>
           <CardContent className="text-muted-foreground text-sm">Assigned to response teams</CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Resolved (24h)</CardDescription>
-            <CardTitle className="text-3xl">12</CardTitle>
+            <CardTitle className="text-3xl">{stats.resolved}</CardTitle>
           </CardHeader>
           <CardContent className="text-muted-foreground text-sm">Successfully closed</CardContent>
         </Card>
@@ -74,12 +156,26 @@ export default function Authorities() {
               <CardDescription>Incoming reports and automated detections</CardDescription>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="gap-2"><Map className="h-4 w-4" /> View Map</Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2"
+                onClick={() => setIsMapOpen(true)}
+              >
+                <Map className="h-4 w-4" /> View Map
+              </Button>
               <Button size="sm" className="gap-2"><CheckCircle2 className="h-4 w-4" /> Acknowledge All</Button>
             </div>
           </div>
         </CardHeader>
         <CardContent>
+          {isLoading && (
+            <div className="text-sm text-muted-foreground">Loading incidents…</div>
+          )}
+          {error && !isLoading && (
+            <div className="text-sm text-red-600">{error}</div>
+          )}
+          {!isLoading && !error && (
           <Table>
             <TableHeader>
               <TableRow>
@@ -93,7 +189,7 @@ export default function Authorities() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {SAMPLE_INCIDENTS.map((inc) => (
+              {incidents.map((inc) => (
                 <TableRow key={inc.id}>
                   <TableCell className="font-medium">{inc.id}</TableCell>
                   <TableCell className="flex items-center gap-2">
@@ -105,7 +201,7 @@ export default function Authorities() {
                     {inc.severity === "info" && <Badge>Info</Badge>}
                   </TableCell>
                   <TableCell>{inc.location}</TableCell>
-                  <TableCell>{inc.reportedAt}</TableCell>
+                  <TableCell>{new Date(inc.reportedAt).toLocaleString()}</TableCell>
                   <TableCell>
                     {inc.status === "open" && <Badge variant="destructive">Open</Badge>}
                     {inc.status === "acknowledged" && <Badge variant="secondary">Acknowledged</Badge>}
@@ -118,8 +214,20 @@ export default function Authorities() {
               ))}
             </TableBody>
           </Table>
+          )}
         </CardContent>
       </Card>
+
+      <Dialog open={isMapOpen} onOpenChange={setIsMapOpen}>
+        <DialogContent className="sm:max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><Map className="h-5 w-5" /> Incident Map</DialogTitle>
+          </DialogHeader>
+          <div>
+            <OceanMap markers={markers} />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

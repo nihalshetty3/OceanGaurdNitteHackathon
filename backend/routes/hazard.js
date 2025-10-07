@@ -119,4 +119,55 @@ router.get('/all', authMiddleware, async (req, res) => {
 });
 
 
+router.get("/recent", (req, res) => {
+  try {
+    const filePath = path.join(__dirname, "../data/incidents.json");
+
+    // Read JSON file
+    const data = fs.readFileSync(filePath, "utf-8");
+    const incidents = JSON.parse(data);
+
+    // Sort by reportedAt (latest first)
+    incidents.sort((a, b) => new Date(b.reportedAt) - new Date(a.reportedAt));
+
+    res.json({
+      success: true,
+      total: incidents.length,
+      incidents,
+    });
+  } catch (error) {
+    console.error("❌ Error reading incidents.json:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error loading incidents data",
+    });
+  }
+});
+
+router.get("/recent", (req, res) => {
+  try {
+    const filePath = path.join(__dirname, "../data/incidents.json");
+
+    // Read JSON file
+    const data = fs.readFileSync(filePath, "utf-8");
+    const incidents = JSON.parse(data);
+
+    // Sort by reportedAt (latest first)
+    incidents.sort((a, b) => new Date(b.reportedAt) - new Date(a.reportedAt));
+
+    res.json({
+      success: true,
+      total: incidents.length,
+      incidents,
+    });
+  } catch (error) {
+    console.error("❌ Error reading incidents.json:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error loading incidents data",
+    });
+  }
+});
+
+
 module.exports = router;
