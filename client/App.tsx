@@ -17,6 +17,8 @@ import Profile from "@/pages/Profile";
 // --- REQUIRED NEW IMPORT ---
 import AssignTeamsPage from "./pages/AssignTeamsPage"; // Import your new component
 // -------------------------
+import CriminalReportPage from "./pages/CriminalReportPage";
+import MunicipalityReportPage from "./pages/MunicipalityReportPage";
 
 const queryClient = new QueryClient();
 
@@ -57,6 +59,8 @@ const App = () => (
               element={<AssignTeamsPage />} // Now uses the actual component
             />
             {/* ------------------------------------------------------------- */}
+            <Route path="/criminalreport" element={<CriminalReportPage />} />
+            <Route path="/municipalityreport" element={<MunicipalityReportPage />} />
             
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
