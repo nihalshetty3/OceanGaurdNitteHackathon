@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 const hazardRoutes = require("./routes/hazard");
 const authRoutes = require("./routes/auth");
 const reportsRoutes = require("./routes/reports");
+const hazardIngestRoutes = require("./routes/hazard_ingest");
 const connectDB = require('./config/db');
 
 
@@ -47,6 +48,7 @@ app.use("/api/hazards", hazardRoutes);
 app.use("/hazards", hazardRoutes);
 app.use("/auth", authRoutes);
 app.use("/api/reports", reportsRoutes);
+app.use("/api/hazard-ingest", hazardIngestRoutes);
 
 
 

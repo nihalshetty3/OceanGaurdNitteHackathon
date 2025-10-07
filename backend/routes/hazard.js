@@ -119,55 +119,28 @@ router.get('/all', authMiddleware, async (req, res) => {
 });
 
 
-router.get("/recent", (req, res) => {
-  try {
-    const filePath = path.join(__dirname, "../data/incidents.json");
+router.get("/recent", async (req, res) => {
+    try {
+      // Fetch latest hazards (you can limit to, say, last 10)
+      const recentHazards = await Hazard.find()
+        .populate("reportedBy", "name email") // Optional: show reporter info
+        .sort({ createdAt: -1 }) // Newest first
+        .limit(10);
+  
+      res.json({
+        success: true,
+        total: recentHazards.length,
+        incidents: recentHazards,
+      });
+    } catch (error) {
+      console.error("❌ Error fetching recent hazards:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error fetching recent hazards from database",
+      });
+    }
+  });
 
-    // Read JSON file
-    const data = fs.readFileSync(filePath, "utf-8");
-    const incidents = JSON.parse(data);
-
-    // Sort by reportedAt (latest first)
-    incidents.sort((a, b) => new Date(b.reportedAt) - new Date(a.reportedAt));
-
-    res.json({
-      success: true,
-      total: incidents.length,
-      incidents,
-    });
-  } catch (error) {
-    console.error("❌ Error reading incidents.json:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error loading incidents data",
-    });
-  }
-});
-
-router.get("/recent", (req, res) => {
-  try {
-    const filePath = path.join(__dirname, "../data/incidents.json");
-
-    // Read JSON file
-    const data = fs.readFileSync(filePath, "utf-8");
-    const incidents = JSON.parse(data);
-
-    // Sort by reportedAt (latest first)
-    incidents.sort((a, b) => new Date(b.reportedAt) - new Date(a.reportedAt));
-
-    res.json({
-      success: true,
-      total: incidents.length,
-      incidents,
-    });
-  } catch (error) {
-    console.error("❌ Error reading incidents.json:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error loading incidents data",
-    });
-  }
-});
 
 
 module.exports = router;

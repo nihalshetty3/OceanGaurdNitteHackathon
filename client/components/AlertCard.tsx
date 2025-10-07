@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import { AlertTriangle, Waves, Activity, Tornado } from "lucide-react";
 
-export type AlertType = "Flood" | "Earthquake" | "Cyclone" | "Tsunami" | "Other";
+export type AlertType = "Flood" | "Earthquake" | "Cyclone" | "Tsunami" | "Oil Spill" | "Marine Life Distress" | "Poaching" | "Unauthorized Vessel" | "Unusual Algae" | "Other";
 
 export interface AlertItem {
   id: string;

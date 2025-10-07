@@ -22,7 +22,7 @@ const hazardSchema = new mongoose.Schema({
   hazardType: {
     type: String,
     required: true,
-    enum: ['High Waves', 'Oil Spill', 'Debris', 'Flooding', 'Other']
+    trim: true
   },
 
   // ✅ CRITICAL CHANGE: This is the correct way to store location for geo-queries
@@ -52,7 +52,13 @@ const hazardSchema = new mongoose.Schema({
     type: String,
     enum: ['Low', 'Medium', 'High'],
     default: 'Low'
-  }
+  },
+
+  // Optional metadata for easier querying/display
+  pincode: { type: String, trim: true },
+  locationText: { type: String, trim: true },
+  // Preserve the user-submitted type label (e.g., Poaching) even if normalized
+  submittedType: { type: String, trim: true }
 }, { timestamps: true }); // Adding timestamps is always a good practice
 
 module.exports = mongoose.model("Hazard", hazardSchema);

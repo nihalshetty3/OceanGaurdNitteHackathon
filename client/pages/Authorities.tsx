@@ -1,4 +1,4 @@
-import { Shield, Siren, Users, Map, CheckCircle2, AlertTriangle } from "lucide-react";
+import { Shield, Siren, Users, Map as MapIcon, CheckCircle2, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +16,8 @@ type Incident = {
   location: string;
   reportedAt: string; // ISO string
   status: "open" | "acknowledged" | "resolved";
+  pincode?: string;
+  aiConfidence?: number | null;
 };
 
 export default function Authorities() {
@@ -26,39 +28,49 @@ export default function Authorities() {
 
   useEffect(() => {
     let isMounted = true;
-    async function fetchIncidents() {
+    const API_BASE = (import.meta as any).env?.VITE_API_BASE || "http://localhost:5000";
+
+    async function loadHazards() {
       try {
         setIsLoading(true);
         setError(null);
-        const res = await fetch("http://localhost:5000/api/hazards/recent", {
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
+        // Fetch only AI-positive hazards for fast display
+        const rep = await fetch(`${API_BASE}/api/reports/hazards?minConfidence=0.7`);
+        const reports: any[] = await rep.json();
+
+        const normalized: (Incident & { aiConfidence?: number | null })[] = (reports || []).map((r: any) => {
+          const conf = typeof r?.ai?.confidence === 'number' ? r.ai.confidence : null;
+          let severity: Incident["severity"] = 'info';
+          if (typeof conf === 'number') {
+            severity = conf >= 0.8 ? 'critical' : conf >= 0.5 ? 'warning' : 'info';
+          }
+          const locStr = r?.location ? String(r.location) : (r?.pincode || 'Unknown');
+          return {
+            id: String(r.id ?? r._id ?? ''),
+            type: String(r.type ?? 'Unknown'),
+            severity,
+            location: locStr,
+            reportedAt: String(r.createdAt ?? new Date().toISOString()),
+            status: 'open',
+            pincode: String(r.pincode || ''),
+            aiConfidence: conf,
+          } as any;
         });
-        if (!res.ok) {
-          throw new Error(`Failed to load incidents (${res.status})`);
-        }
-        const data: { success: boolean; incidents: any[] } = await res.json();
-        if (!data?.success || !Array.isArray(data.incidents)) {
-          throw new Error("Invalid incidents response");
-        }
-        const normalized: Incident[] = data.incidents.map((it) => ({
-          id: String(it.id ?? ""),
-          type: String(it.type ?? "Unknown"),
-          severity: String(it.severity ?? "info").toLowerCase() as Incident["severity"],
-          location: String(it.location ?? "Unknown"),
-          reportedAt: String(it.reportedAt ?? new Date().toISOString()),
-          status: String(it.status ?? "open").toLowerCase() as Incident["status"],
-        }));
         if (isMounted) setIncidents(normalized);
       } catch (e: any) {
-        if (isMounted) setError(e?.message ?? "Error loading incidents");
+        if (isMounted) setError(e?.message || 'Error loading incidents');
       } finally {
         if (isMounted) setIsLoading(false);
       }
     }
-    fetchIncidents();
+
+    // initial load
+    loadHazards();
+    // poll every 3s for near‑real‑time updates
+    const id = setInterval(loadHazards, 3000);
     return () => {
       isMounted = false;
+      clearInterval(id);
     };
   }, []);
 
@@ -71,32 +83,85 @@ export default function Authorities() {
     return { total, critical, acknowledged, resolved };
   }, [incidents]);
 
-  // Build map markers from incidents when possible (expects location as "lat,lng" or similar)
+  // Location mapping for common places in the region
+  const locationMap: Record<string, [number, number]> = {
+    'goa': [15.2993, 74.1240],
+    'mangalore': [12.9141, 74.8560],
+    'managlore': [12.9141, 74.8560], // Handle typo
+    'karkala': [13.2000, 74.9833],
+    'udupi': [13.3409, 74.7421],
+    'bangalore': [12.9716, 77.5946],
+    'mumbai': [19.0760, 72.8777],
+    'chennai': [13.0827, 80.2707],
+    'kochi': [9.9312, 76.2673],
+    'trivandrum': [8.5241, 76.9366],
+    'calicut': [11.2588, 75.7804],
+    'kannur': [11.8745, 75.3704],
+    'kasargod': [12.4984, 74.9899],
+    'dakshina kannada': [12.9141, 74.8560],
+    'uttara kannada': [14.5204, 74.6047],
+    'udupi district': [13.3409, 74.7421],
+    'coastal karnataka': [13.3409, 74.7421],
+  };
+
+  // Build map markers from incidents
   const markers: MapMarker[] = useMemo(() => {
-    const allowedTypes: AlertType[] = ["Flood", "Earthquake", "Cyclone", "Tsunami", "Other"];
+    const allowedTypes: AlertType[] = ["Flood", "Earthquake", "Cyclone", "Tsunami", "Oil Spill", "Marine Life Distress", "Poaching", "Unauthorized Vessel", "Unusual Algae", "Other"];
     const toAlertType = (t: string): AlertType => {
       const normalized = t.trim().toLowerCase();
       const match = allowedTypes.find((x) => x.toLowerCase() === normalized);
       return match ?? "Other";
     };
-    const parseLatLng = (loc: string): [number, number] | null => {
-      // Try to parse formats like "lat,lng" or "lat | lng" etc.
-      const parts = loc.split(/[,|\s]+/).filter(Boolean);
-      if (parts.length < 2) return null;
-      const lat = Number(parts[0]);
-      const lng = Number(parts[1]);
-      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
-      return [lat, lng];
+    
+    const getLocationCoordinates = (location: string, pincode?: string): [number, number] | null => {
+      // First try to parse as lat,lng coordinates
+      const parts = location.split(/[,|\s]+/).filter(Boolean);
+      if (parts.length >= 2) {
+        const lat = Number(parts[0]);
+        const lng = Number(parts[1]);
+        if (Number.isFinite(lat) && Number.isFinite(lng)) {
+          return [lat, lng];
+        }
+      }
+      
+      // Try to find in location map
+      const normalizedLocation = location.toLowerCase().trim();
+      const coords = locationMap[normalizedLocation];
+      if (coords) return coords;
+      
+      // Try partial matches for common patterns
+      for (const [key, value] of Object.entries(locationMap)) {
+        if (normalizedLocation.includes(key) || key.includes(normalizedLocation)) {
+          return value;
+        }
+      }
+      
+      // Default to Goa coordinates if no match found
+      return [15.2993, 74.1240];
     };
+
     return incidents
       .map((inc) => {
-        const pos = parseLatLng(inc.location);
+        const pos = getLocationCoordinates(inc.location, inc.pincode);
         if (!pos) return null;
+        
+        // Determine severity based on AI confidence
+        let severity: "low" | "medium" | "high" | "critical" = "low";
+        if (inc.aiConfidence != null) {
+          if (inc.aiConfidence >= 0.8) severity = "critical";
+          else if (inc.aiConfidence >= 0.6) severity = "high";
+          else if (inc.aiConfidence >= 0.4) severity = "medium";
+          else severity = "low";
+        }
+        
         return {
           id: inc.id,
           position: pos,
-          title: inc.type,
+          title: `${inc.type} - ${inc.location}`,
           type: toAlertType(inc.type),
+          severity,
+          confidence: inc.aiConfidence ?? undefined,
+          reportedAt: inc.reportedAt,
         } satisfies MapMarker;
       })
       .filter(Boolean) as MapMarker[];
@@ -162,7 +227,7 @@ export default function Authorities() {
                 className="gap-2"
                 onClick={() => setIsMapOpen(true)}
               >
-                <Map className="h-4 w-4" /> View Map
+                <MapIcon className="h-4 w-4" /> View Map
               </Button>
               <Button size="sm" className="gap-2"><CheckCircle2 className="h-4 w-4" /> Acknowledge All</Button>
             </div>
@@ -179,34 +244,34 @@ export default function Authorities() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>ID</TableHead>
+                <TableHead>#</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>Severity</TableHead>
                 <TableHead>Location</TableHead>
                 <TableHead>Reported</TableHead>
-                <TableHead>Status</TableHead>
                 <TableHead className="text-right">Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {incidents.map((inc) => (
-                <TableRow key={inc.id}>
-                  <TableCell className="font-medium">{inc.id}</TableCell>
+              {incidents.map((inc: any, idx) => (
+                <TableRow key={inc.id || idx}>
+                  <TableCell className="font-medium">{idx + 1}</TableCell>
                   <TableCell className="flex items-center gap-2">
                     <AlertTriangle className="h-4 w-4 text-amber-600" /> {inc.type}
                   </TableCell>
                   <TableCell>
-                    {inc.severity === "critical" && <Badge variant="destructive">Critical</Badge>}
-                    {inc.severity === "warning" && <Badge variant="secondary">Warning</Badge>}
-                    {inc.severity === "info" && <Badge>Info</Badge>}
+                    {inc.aiConfidence != null ? (
+                      inc.aiConfidence >= 0.7 ? (
+                        <Badge variant="destructive">Hazard</Badge>
+                      ) : (
+                        <Badge>Not hazard</Badge>
+                      )
+                    ) : (
+                      <Badge>Unknown</Badge>
+                    )}
                   </TableCell>
                   <TableCell>{inc.location}</TableCell>
                   <TableCell>{new Date(inc.reportedAt).toLocaleString()}</TableCell>
-                  <TableCell>
-                    {inc.status === "open" && <Badge variant="destructive">Open</Badge>}
-                    {inc.status === "acknowledged" && <Badge variant="secondary">Acknowledged</Badge>}
-                    {inc.status === "resolved" && <Badge>Resolved</Badge>}
-                  </TableCell>
                   <TableCell className="text-right">
                     <Button size="sm" variant="outline">View</Button>
                   </TableCell>
@@ -219,11 +284,33 @@ export default function Authorities() {
       </Card>
 
       <Dialog open={isMapOpen} onOpenChange={setIsMapOpen}>
-        <DialogContent className="sm:max-w-3xl">
+        <DialogContent className="sm:max-w-5xl max-h-[90vh]">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2"><Map className="h-5 w-5" /> Incident Map</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <MapIcon className="h-5 w-5" /> 
+              Hazard Locations Map
+              <Badge variant="outline" className="ml-2">{markers.length} incidents</Badge>
+            </DialogTitle>
           </DialogHeader>
-          <div>
+          <div className="space-y-4">
+            <div className="flex flex-wrap gap-2 text-xs">
+              <div className="flex items-center gap-1">
+                <div className="w-3 h-3 rounded-full bg-red-600"></div>
+                <span>Critical (≥80%)</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-3 h-3 rounded-full bg-orange-600"></div>
+                <span>High (60-79%)</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-3 h-3 rounded-full bg-amber-600"></div>
+                <span>Medium (40-59%)</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-3 h-3 rounded-full bg-green-600"></div>
+                <span>Low (&lt;40%)</span>
+              </div>
+            </div>
             <OceanMap markers={markers} />
           </div>
         </DialogContent>

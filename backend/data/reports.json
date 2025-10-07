@@ -553,6 +553,571 @@
           "nlp": 0
         }
       }
+    },
+    {
+      "id": "1759858760692-pvq4cu",
+      "category": "criminal",
+      "title": "ilegal fishing",
+      "type": "Poaching",
+      "description": "mlmvl",
+      "location": "Mangalore",
+      "pincode": "575003",
+      "createdAt": "2025-10-07T17:39:20.692Z",
+      "status": "submitted",
+      "ai": {
+        "isHazard": null,
+        "confidence": null,
+        "components": null,
+        "error": "ai_unavailable"
+      }
+    },
+    {
+      "id": "1759859038697-n6nzu5",
+      "category": "criminal",
+      "title": "ilegal",
+      "type": "Unauthorized Vessel",
+      "description": "bj",
+      "location": "Karkala",
+      "pincode": "575003",
+      "createdAt": "2025-10-07T17:43:58.697Z",
+      "status": "submitted",
+      "ai": {
+        "isHazard": null,
+        "confidence": null,
+        "components": null,
+        "error": "ai_unavailable"
+      }
+    },
+    {
+      "id": "1759859204319-2up4vi",
+      "category": "criminal",
+      "title": "nkl",
+      "type": "Unauthorized Vessel",
+      "description": "jkn",
+      "location": "Mangalore",
+      "pincode": "575003",
+      "createdAt": "2025-10-07T17:46:44.319Z",
+      "status": "submitted",
+      "ai": {
+        "isHazard": null,
+        "confidence": null,
+        "components": null,
+        "error": "ai_unavailable"
+      }
+    },
+    {
+      "id": "1759859399853-yugkg4",
+      "category": "criminal",
+      "title": "nlkk;",
+      "type": "Unauthorized Vessel",
+      "description": " k,f",
+      "location": "managlore",
+      "pincode": "576003",
+      "createdAt": "2025-10-07T17:49:59.853Z",
+      "status": "submitted",
+      "ai": {
+        "isHazard": null,
+        "confidence": null,
+        "components": null,
+        "error": "ai_unavailable"
+      }
+    },
+    {
+      "id": "1759860715611-vhk2ri",
+      "category": "criminal",
+      "title": "vghjkl",
+      "type": "Poaching",
+      "description": " hjnml",
+      "location": "udupi",
+      "pincode": "575003",
+      "createdAt": "2025-10-07T18:11:55.611Z",
+      "status": "submitted",
+      "ai": {
+        "isHazard": null,
+        "confidence": null,
+        "components": null,
+        "error": "ai_unavailable"
+      }
+    },
+    {
+      "id": "1759861064307-z8acv4",
+      "category": "criminal",
+      "title": "fifi",
+      "type": "Poaching",
+      "description": "kjl",
+      "location": "Karkala",
+      "pincode": "575003",
+      "createdAt": "2025-10-07T18:17:44.307Z",
+      "status": "submitted",
+      "ai": {
+        "isHazard": false,
+        "confidence": 0.667,
+        "components": {
+          "consensus": 0.667,
+          "counts": {
+            "pair_count": 2,
+            "type_count": 2
+          },
+          "history": 0.667,
+          "keywords": 0,
+          "nlp": 0
+        }
+      }
+    },
+    {
+      "id": "1759861124240-uejwra",
+      "category": "criminal",
+      "title": "fifi",
+      "type": "Poaching",
+      "description": "iujkl",
+      "location": "Karkala",
+      "pincode": "575003",
+      "createdAt": "2025-10-07T18:18:44.240Z",
+      "status": "submitted",
+      "ai": {
+        "isHazard": true,
+        "confidence": 1,
+        "components": {
+          "consensus": 1,
+          "counts": {
+            "pair_count": 3,
+            "type_count": 3
+          },
+          "history": 1,
+          "keywords": 0,
+          "nlp": 0
+        }
+      }
+    },
+    {
+      "id": "1759866320913-z4nily",
+      "category": "ocean",
+      "title": "flood",
+      "type": "Flood",
+      "description": "its an emergency ",
+      "location": "udupi",
+      "pincode": "576003",
+      "createdAt": "2025-10-07T19:45:20.913Z",
+      "status": "submitted",
+      "ai": {
+        "isHazard": false,
+        "confidence": 0.4,
+        "components": {
+          "consensus": 0,
+          "counts": {
+            "pair_count": 0,
+            "type_count": 5
+          },
+          "history": 1,
+          "keywords": 0,
+          "nlp": 0
+        }
+      }
+    },
+    {
+      "id": "1759866354361-7sy3jd",
+      "category": "ocean",
+      "title": "flood",
+      "type": "Oil Spill",
+      "description": "its an emergency buddy",
+      "location": "udupi",
+      "pincode": "576000",
+      "createdAt": "2025-10-07T19:45:54.361Z",
+      "status": "submitted",
+      "ai": {
+        "isHazard": false,
+        "confidence": 0.4,
+        "components": {
+          "consensus": 0,
+          "counts": {
+            "pair_count": 0,
+            "type_count": 18
+          },
+          "history": 1,
+          "keywords": 0,
+          "nlp": 0
+        }
+      }
+    },
+    {
+      "id": "1759866421477-ug69ix",
+      "category": "ocean",
+      "title": "flood",
+      "type": "Flood",
+      "description": "emergency",
+      "location": "udupi",
+      "pincode": "576003",
+      "createdAt": "2025-10-07T19:47:01.476Z",
+      "status": "submitted",
+      "ai": {
+        "isHazard": false,
+        "confidence": 0.6,
+        "components": {
+          "consensus": 0.333,
+          "counts": {
+            "pair_count": 1,
+            "type_count": 6
+          },
+          "history": 1,
+          "keywords": 0,
+          "nlp": 0
+        }
+      }
+    },
+    {
+      "id": "1759866506461-mpv15i",
+      "category": "ocean",
+      "title": "flood",
+      "type": "Flood",
+      "description": "its an emergency ",
+      "location": "udupi",
+      "pincode": "576003",
+      "createdAt": "2025-10-07T19:48:26.461Z",
+      "status": "submitted",
+      "ai": {
+        "isHazard": true,
+        "confidence": 0.8,
+        "components": {
+          "consensus": 0.667,
+          "counts": {
+            "pair_count": 2,
+            "type_count": 7
+          },
+          "history": 1,
+          "keywords": 0,
+          "nlp": 0
+        }
+      }
+    },
+    {
+      "id": "1759866601512-x9pln8",
+      "category": "ocean",
+      "title": "flood",
+      "type": "Flood",
+      "description": "bjk",
+      "location": "udupi",
+      "pincode": "576003",
+      "createdAt": "2025-10-07T19:50:01.512Z",
+      "status": "submitted",
+      "ai": {
+        "isHazard": true,
+        "confidence": 1,
+        "components": {
+          "consensus": 1,
+          "counts": {
+            "pair_count": 3,
+            "type_count": 8
+          },
+          "history": 1,
+          "keywords": 0,
+          "nlp": 0
+        }
+      }
+    },
+    {
+      "id": "1759866602408-hs5n6b",
+      "category": "ocean",
+      "title": "flood",
+      "type": "Flood",
+      "description": "bjk",
+      "location": "udupi",
+      "pincode": "576003",
+      "createdAt": "2025-10-07T19:50:02.408Z",
+      "status": "submitted",
+      "ai": {
+        "isHazard": true,
+        "confidence": 1,
+        "components": {
+          "consensus": 1,
+          "counts": {
+            "pair_count": 4,
+            "type_count": 9
+          },
+          "history": 1,
+          "keywords": 0,
+          "nlp": 0
+        }
+      }
+    },
+    {
+      "id": "1759866916503-jmp5da",
+      "category": "ocean",
+      "title": "sd",
+      "type": "Oil Spill",
+      "description": "ff",
+      "location": "managlore",
+      "pincode": "576003",
+      "createdAt": "2025-10-07T19:55:16.503Z",
+      "status": "submitted",
+      "ai": {
+        "isHazard": false,
+        "confidence": 0.4,
+        "components": {
+          "consensus": 0,
+          "counts": {
+            "pair_count": 0,
+            "type_count": 19
+          },
+          "history": 1,
+          "keywords": 0,
+          "nlp": 0
+        }
+      }
+    },
+    {
+      "id": "1759866974434-54iphe",
+      "category": "ocean",
+      "title": "bhjk",
+      "type": "Unusual Algae",
+      "description": "jkl",
+      "location": "bkjnk",
+      "pincode": "567003",
+      "createdAt": "2025-10-07T19:56:14.434Z",
+      "status": "submitted",
+      "ai": {
+        "isHazard": false,
+        "confidence": 0,
+        "components": {
+          "consensus": 0,
+          "counts": {
+            "pair_count": 0,
+            "type_count": 0
+          },
+          "history": 0,
+          "keywords": 0,
+          "nlp": 0
+        }
+      }
+    },
+    {
+      "id": "1759878063880-prhdz9",
+      "category": "ocean",
+      "title": "flood",
+      "type": "Flood",
+      "description": "jk",
+      "location": "mangalore",
+      "pincode": "575003",
+      "createdAt": "2025-10-07T23:01:03.880Z",
+      "status": "submitted",
+      "ai": {
+        "isHazard": true,
+        "confidence": 1,
+        "components": {
+          "consensus": 1,
+          "counts": {
+            "pair_count": 4,
+            "type_count": 10
+          },
+          "history": 1,
+          "keywords": 0,
+          "nlp": 0
+        }
+      }
+    },
+    {
+      "id": "1759878091731-ob0lpd",
+      "category": "ocean",
+      "title": "flood",
+      "type": "Oil Spill",
+      "description": "fff",
+      "location": "mangalore",
+      "pincode": "575003",
+      "createdAt": "2025-10-07T23:01:31.731Z",
+      "status": "submitted",
+      "ai": {
+        "isHazard": true,
+        "confidence": 1,
+        "components": {
+          "consensus": 1,
+          "counts": {
+            "pair_count": 18,
+            "type_count": 20
+          },
+          "history": 1,
+          "keywords": 0,
+          "nlp": 0
+        }
+      }
+    },
+    {
+      "id": "1759878584455-4gxtup",
+      "category": "ocean",
+      "title": "flood",
+      "type": "Flood",
+      "description": "dds",
+      "location": "bangalore",
+      "pincode": "576003",
+      "createdAt": "2025-10-07T23:09:44.455Z",
+      "status": "submitted",
+      "ai": {
+        "isHazard": true,
+        "confidence": 1,
+        "components": {
+          "consensus": 1,
+          "counts": {
+            "pair_count": 5,
+            "type_count": 11
+          },
+          "history": 1,
+          "keywords": 0,
+          "nlp": 0
+        }
+      }
+    },
+    {
+      "id": "1759878617126-ha11sm",
+      "category": "ocean",
+      "title": "flood",
+      "type": "Oil Spill",
+      "description": " nm",
+      "location": "bangalore",
+      "pincode": "575003",
+      "createdAt": "2025-10-07T23:10:17.126Z",
+      "status": "submitted",
+      "ai": {
+        "isHazard": true,
+        "confidence": 1,
+        "components": {
+          "consensus": 1,
+          "counts": {
+            "pair_count": 19,
+            "type_count": 21
+          },
+          "history": 1,
+          "keywords": 0,
+          "nlp": 0
+        }
+      }
+    },
+    {
+      "id": "1759879107596-j745yr",
+      "userId": "68e3d5b16e8babd090a28d56",
+      "category": "ocean",
+      "title": "flood",
+      "type": "Flood",
+      "description": "ff",
+      "location": "bangalore",
+      "pincode": "575003",
+      "createdAt": "2025-10-07T23:18:27.596Z",
+      "status": "submitted",
+      "ai": {
+        "isHazard": true,
+        "confidence": 1,
+        "components": {
+          "consensus": 1,
+          "counts": {
+            "pair_count": 5,
+            "type_count": 12
+          },
+          "history": 1,
+          "keywords": 0,
+          "nlp": 0
+        }
+      }
+    },
+    {
+      "id": "1759879141696-wyt4wp",
+      "userId": "68e3d5b16e8babd090a28d56",
+      "category": "ocean",
+      "title": "flood",
+      "type": "Oil Spill",
+      "description": "njk",
+      "location": "bangalore",
+      "pincode": "575003",
+      "createdAt": "2025-10-07T23:19:01.696Z",
+      "status": "submitted",
+      "ai": {
+        "isHazard": true,
+        "confidence": 1,
+        "components": {
+          "consensus": 1,
+          "counts": {
+            "pair_count": 20,
+            "type_count": 22
+          },
+          "history": 1,
+          "keywords": 0,
+          "nlp": 0
+        }
+      }
+    },
+    {
+      "id": "1759879505647-xwgmhz",
+      "userId": "68e3d5b16e8babd090a28d56",
+      "category": "ocean",
+      "title": "cyclone",
+      "type": "Cyclone",
+      "description": "jk",
+      "location": "kaup",
+      "pincode": "574996",
+      "createdAt": "2025-10-07T23:25:05.647Z",
+      "status": "submitted",
+      "ai": {
+        "isHazard": false,
+        "confidence": 0,
+        "components": {
+          "consensus": 0,
+          "counts": {
+            "pair_count": 0,
+            "type_count": 0
+          },
+          "history": 0,
+          "keywords": 0,
+          "nlp": 0
+        }
+      }
+    },
+    {
+      "id": "1759879539179-mdrr4d",
+      "userId": "68e3d5b16e8babd090a28d56",
+      "category": "ocean",
+      "title": "cyclone",
+      "type": "Oil Spill",
+      "description": "hjnkm",
+      "location": "kaup",
+      "pincode": "574996",
+      "createdAt": "2025-10-07T23:25:39.179Z",
+      "status": "submitted",
+      "ai": {
+        "isHazard": false,
+        "confidence": 0.4,
+        "components": {
+          "consensus": 0,
+          "counts": {
+            "pair_count": 0,
+            "type_count": 23
+          },
+          "history": 1,
+          "keywords": 0,
+          "nlp": 0
+        }
+      }
+    },
+    {
+      "id": "1759881247927-2oojmb",
+      "userId": "68e3d5b16e8babd090a28d56",
+      "category": "ocean",
+      "title": "flood",
+      "type": "Flood",
+      "description": "jk",
+      "location": "karkala",
+      "pincode": "575003",
+      "createdAt": "2025-10-07T23:54:07.927Z",
+      "status": "submitted",
+      "ai": {
+        "isHazard": true,
+        "confidence": 1,
+        "components": {
+          "consensus": 1,
+          "counts": {
+            "pair_count": 6,
+            "type_count": 13
+          },
+          "history": 1,
+          "keywords": 0,
+          "nlp": 0
+        }
+      }
     }
   ]
 }
