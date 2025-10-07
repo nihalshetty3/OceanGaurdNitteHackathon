@@ -13,6 +13,9 @@ import PlaceholderPage from "@/pages/PlaceholderPage";
 import Login from "@/pages/Login";
 import Signup from "@/pages/Signup";
 import Authorities from "@/pages/Authorities";
+// --- REQUIRED NEW IMPORT ---
+import AssignTeamsPage from "./pages/AssignTeamsPage"; // Import your new component
+// -------------------------
 
 const queryClient = new QueryClient();
 
@@ -26,11 +29,37 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/community" element={<Community />} />
-            <Route path="/alerts" element={<PlaceholderPage title="Live Alerts" description="A dedicated alerts dashboard can be added here. For now, view alerts on the homepage." />} />
-            <Route path="/report" element={<PlaceholderPage title="Report Incident" description="Use the Community page to submit a report. We can add a standalone report flow here if you prefer." />} />
+            <Route
+              path="/alerts"
+              element={
+                <PlaceholderPage
+                  title="Live Alerts"
+                  description="A dedicated alerts dashboard can be added here. For now, view alerts on the homepage."
+                />
+              }
+            />
+            <Route
+              path="/report"
+              element={
+                <PlaceholderPage
+                  title="Report Incident"
+                  description="Use the Community page to submit a report. We can add a standalone report flow here if you prefer."
+                />
+              }
+            />
+            
             <Route path="/authorities" element={<Authorities />} />
+
+            {/* --- UPDATED ROUTE: Use the actual AssignTeamsPage component --- */}
+            <Route 
+              path="/assign-teams" 
+              element={<AssignTeamsPage />} // Now uses the actual component
+            />
+            {/* ------------------------------------------------------------- */}
+            
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
