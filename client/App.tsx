@@ -13,6 +13,7 @@ import PlaceholderPage from "@/pages/PlaceholderPage";
 import Login from "@/pages/Login";
 import Signup from "@/pages/Signup";
 import Authorities from "@/pages/Authorities";
+import Profile from "@/pages/Profile";
 // --- REQUIRED NEW IMPORT ---
 import AssignTeamsPage from "./pages/AssignTeamsPage"; // Import your new component
 // -------------------------
@@ -59,6 +60,7 @@ const App = () => (
             
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/profile" element={<Profile />} />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

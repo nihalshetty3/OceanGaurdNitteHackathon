@@ -3,7 +3,8 @@ from flask import Flask, request, jsonify
 from transformers import pipeline
 
 app = Flask(__name__)
-classifier = pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
+classifier = pipeline("zero-shot-classification", model="typeform/distilbert-base-uncased-mnli")
+
 
 
 HAZARD_KEYWORDS = ["wave", "tsunami", "flood", "spill", "drown", "boat", "sink", "debris", "oil"]
@@ -47,4 +48,3 @@ def verify_hazard():
 if __name__ == '__main__':
     print("Starting AI verification server on http://localhost:8000")
     app.run(port=8000, debug=True)
-    

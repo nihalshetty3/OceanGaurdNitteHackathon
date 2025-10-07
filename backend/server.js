@@ -13,7 +13,7 @@ const port = 5000;
 app.use(express.json());
 
 
-const allowedOrigins = [
+const allowedOrigins = [ 
     'http://localhost:5173', 
     
   ];

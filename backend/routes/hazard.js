@@ -1,7 +1,7 @@
 const express = require("express");
 const multer = require("multer");
 const Hazard = require("../models/hazard");
-const Pincode = require("../models/pincode"); // ✅ import the pincode model
+const Pincode = require("../models/pincode"); 
 
 const router = express.Router();
 
@@ -16,12 +16,12 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// ✅ POST /api/hazards/add
+
 router.post("/add", upload.single("photo"), async (req, res) => {
   try {
     const { title, hazardType, description, pincode, reportedBy } = req.body;
 
-    // Step 1️⃣: Check if pincode exists in DB
+    
     const validPin = await Pincode.findOne({ pincode: pincode.toString().trim() });
 
     if (!validPin) {
@@ -30,7 +30,7 @@ router.post("/add", upload.single("photo"), async (req, res) => {
       });
     }
 
-    // Step 2️⃣: Prepare hazard location using pincode coordinates
+
     const location = {
       type: "Point",
       coordinates: [validPin.longitude, validPin.latitude], // [lng, lat]
@@ -60,7 +60,7 @@ router.post("/add", upload.single("photo"), async (req, res) => {
   }
 });
 
-// GET /api/hazards — fetch all hazards
+
 router.get("/", async (req, res) => {
   try {
     const hazards = await Hazard.find()
