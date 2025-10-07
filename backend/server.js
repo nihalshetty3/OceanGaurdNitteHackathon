@@ -11,7 +11,25 @@ const app = express();
 const port = 5000;
 
 app.use(express.json());
-app.use(cors());
+
+
+// In development, reflect the request origin to avoid CORS issues across localhost/127.0.0.1/ports
+const corsOptions = {
+  origin: (origin, callback) => callback(null, true),
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
+// Handle CORS preflight for all routes
+// Express 5 doesn't accept bare '*' in routes; handle OPTIONS generically
+// Let cors middleware handle preflight automatically
+
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  next();
+});
+
 app.use("/uploads", express.static("uploads"));
 app.use("/api/hazards", hazardRoutes);
 app.use("/hazards", hazardRoutes);

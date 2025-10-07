@@ -1,11 +1,11 @@
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
 
-const hazardschema = new mongoose.Schema({
-    title:{type:String, require:true},
-    type:{type:String, require:true},
-    description:{type:String, require:true},
-    location:{type:String, require:true},
-    photo:{type:String}
-});
+const hazardSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  type: { type: String, required: true },
+  description: { type: String, required: true },
+  location: { type: String, required: true },
+  photo: { type: String },
+}, { timestamps: true });
 
-module.exports = mongoose.model("Hazard", hazardschema); 
+module.exports = mongoose.model("Hazard", hazardSchema);
