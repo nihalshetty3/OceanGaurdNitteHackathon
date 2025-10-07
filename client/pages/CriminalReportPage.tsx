@@ -11,11 +11,28 @@ import { AlertTriangle } from "lucide-react";
 // --- PLACEHOLDER DATA & LOGIC ---
 const CRIMINAL_REPORT_TYPES = ["Poaching", "Illegal Dumping", "Unauthorized Vessel", "Other"];
 const filteredReports: any[] = []; 
+const API_BASE = (import.meta as any).env?.VITE_API_BASE || "http://localhost:5000";
 
-const handleFormSubmit = (e: FormEvent<HTMLFormElement>) => {
+const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
   e.preventDefault();
-  alert("✅ Criminal Report submitted! (Prototype functionality)");
-  e.currentTarget.reset();
+  const form = e.currentTarget as HTMLFormElement;
+  const formData = new FormData(form);
+  const payload = {
+    category: 'criminal',
+    title: String(formData.get('title') || ''),
+    type: String(formData.get('type') || 'Other'),
+    description: String(formData.get('description') || ''),
+    location: String(formData.get('location') || ''),
+    pincode: String(formData.get('pincode') || ''),
+  };
+  const res = await fetch(`${API_BASE}/api/reports`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    alert(data?.error || `Failed (${res.status})`);
+    return;
+  }
+  alert('✅ Criminal Report saved.');
+  form.reset();
 };
 // --------------------------------
 

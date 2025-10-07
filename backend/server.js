@@ -3,6 +3,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const hazardRoutes = require("./routes/hazard");
 const authRoutes = require("./routes/auth");
+const reportsRoutes = require("./routes/reports");
 const connectDB = require('./config/db');
 
 
@@ -45,6 +46,7 @@ app.use("/uploads", express.static("uploads"));
 app.use("/api/hazards", hazardRoutes);
 app.use("/hazards", hazardRoutes);
 app.use("/auth", authRoutes);
+app.use("/api/reports", reportsRoutes);
 
 
 
